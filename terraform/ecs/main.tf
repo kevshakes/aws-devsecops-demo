@@ -3,12 +3,12 @@ terraform {
   backend "s3" {
     bucket = "aws-devsecops-demo"
     key    = "terraform/state"
-    region = "us-east-1"
+    region = "us-west-2"
   }
 }
 
 provider "aws" {
-  region = "us-east-1"
+  region = "us-west-2"
 }
 
 data "template_file" "user_data" {
@@ -190,7 +190,7 @@ resource "aws_cloudwatch_log_group" "awslogs-aws-devsecops-demo" {
   name = "awslogs-aws-devsecops-demo"
   tags = {
     team  = "devrel marketing"
-    owner = "Angel Rivera"
+    owner = "Kevin Tuei"
   }
 }
 
@@ -223,7 +223,7 @@ resource "aws_alb" "main" {
   ]
   tags = {
     team  = "DevRel Marketing",
-    owner = "Angel Rivera"
+    owner = "Kevin Tuei"
   }
 }
 
