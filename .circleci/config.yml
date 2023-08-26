@@ -77,7 +77,7 @@ jobs:
             terraform -chdir=./terraform/ecs apply \
               -var docker_img_name=$AWS_ECR_ACCOUNT_URL/$AWS_ECR_REPO \
               -var docker_img_tag=0.1.<< pipeline.number >> \
-              -var key_pair=devrel-angel-rivera \
+              -var key_pair=MyKeyPair \
               -auto-approve
             export ENDPOINT="$(terraform -chdir=./terraform/ecs output load_balancer_hostname)"
             mkdir -p /tmp/ecs/
@@ -129,7 +129,7 @@ workflows:
           requires:
             - scan_build_docker_image
           docker-network: host
-          app-id: bdf5d6af-4c4f-43d9-ba1b-ee305873cb6c
+          app-id: 542e74fa-5f0d-4f82-8c02-dabc9e1865f5
           steps:
             - checkout
             - aws-ecr/ecr-login
