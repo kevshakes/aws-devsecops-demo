@@ -1,7 +1,7 @@
 terraform {
   required_version = ">= 0.13.5"
   backend "s3" {
-    bucket = "aws-devsecops-demo"
+    bucket = "aws-devsecops-demo-tuei2"
     key    = "terraform/state"
     region = "us-west-2"
   }
