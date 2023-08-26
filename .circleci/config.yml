@@ -57,49 +57,6 @@ jobs:
           account-url: AWS_ECR_ACCOUNT_URL
           repo: $AWS_ECR_REPO
           tag: 0.1.<< pipeline.number >>          
-  terraform_deploy_aws_ecs:
-    machine:
-      image: ubuntu-2004:202101-01
-    resource_class: medium
-    steps:
-      - checkout
-      - terraform/install:
-          terraform_version: "1.0.2"
-          arch: "amd64"
-          os: "linux"
-      - terraform/init:
-          path: ./terraform/ecs
-      - terraform/plan:
-          path: ./terraform/ecs
-      - run:
-          name: Terraform apply
-          command: |
-            terraform -chdir=./terraform/ecs apply \
-              -var docker_img_name=$AWS_ECR_ACCOUNT_URL/$AWS_ECR_REPO \
-              -var docker_img_tag=0.1.<< pipeline.number >> \
-              -var key_pair=MyKeyPair \
-              -auto-approve
-            export ENDPOINT="$(terraform -chdir=./terraform/ecs output load_balancer_hostname)"
-            mkdir -p /tmp/ecs/
-            echo 'export ENDPOINT='${ENDPOINT} > /tmp/ecs/endpoint
-      - persist_to_workspace:
-          root: /tmp/ecs/
-          paths:
-            - "*"      
-      - run: sleep 90  
-  smoketest_deployment:
-    machine:
-      image: ubuntu-2004:202101-01
-    resource_class: medium
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /tmp/ecs/
-      - run:
-          name: Smoke Test ECS Deployment
-          command: |
-            source /tmp/ecs/endpoint
-            ./test/smoke_test $ENDPOINT
   terraform_destroy_aws_ecs:
     machine:
       image: ubuntu-2004:202101-01
@@ -137,16 +94,8 @@ workflows:
                 name: Run Stackhawk Scan
                 command: |
                   docker run -d --rm -p5000:5000 $AWS_ECR_ACCOUNT_URL/$AWS_ECR_REPO:0.1.<< pipeline.number >>
-      - terraform_deploy_aws_ecs:
-          requires:
-            - stackhawk/hawkscan-local    
-      - smoketest_deployment:
-          requires:
-            - terraform_deploy_aws_ecs
       - approve_destroy:
           type: approval
-          requires:
-            - smoketest_deployment
       - terraform_destroy_aws_ecs:
           requires:
             - approve_destroy
